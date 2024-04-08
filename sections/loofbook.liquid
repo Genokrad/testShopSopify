@@ -1,0 +1,380 @@
+<style>
+  .text-red {
+    color: red;
+  }
+
+  .product-card-add-to-cart {
+    background-color: black;
+    color: white;
+    border: none;
+    padding: 12px;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .size-select {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+  }
+
+  .product-card-size {
+    flex-grow: 1;
+    width: 30%;
+    margin: 0;
+  }
+
+  .content-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    flex-wrap: wrap;
+    /* background-color: rgb(255, 237, 191);s */
+  }
+
+  .column {
+    flex: 1;
+  }
+
+  .image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .text-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 32px;
+  }
+
+  .modal-box {
+    display: none;
+    /* display: grid; */
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    position: fixed;
+    z-index: 3;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 90%;
+    overflow: auto;
+    /* background-color: white; */
+    padding: 20px;
+    background-color: rgb(251, 251, 200);
+  }
+
+  .open-modal-button {
+    margin-left: 25%;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+  }
+
+  .modal-box-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 10px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+  }
+
+  .product-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .product-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid black;
+    gap: 12px;
+  }
+
+  .product-card-data {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 12px;
+  }
+
+  .product-card-submit-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .product-card-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .product-card-data-main {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 16px;
+  }
+
+  .product-card-data-title {
+    margin: 0;
+  }
+
+  .product-card-price {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .product-card-price p {
+    margin: 0;
+  }
+
+  /* Адаптація для різних розмірів екранів */
+  @media screen and (max-width: 767px) {
+    .column {
+      width: 100%;
+    }
+  }
+</style>
+
+<section id="look_book_section">
+  {% if section.settings.header_text != blank %}
+    <h1>{{ section.settings.header_text }}</h1>
+  {% endif %}
+  {% for block in section.blocks %}
+    <div class="content-container" {{ block.shopify_attributes }}>
+      <div class="column">
+        {% if block.settings.image != blank %}
+          <img
+            src="{{ block.settings.image | image_url }}"
+            alt="{{ block.settings.image.alt }}"
+            class="image"
+            width="100%"
+            height="100%"
+            loading="lazy">
+        {% else %}
+          {{ 'detailed-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+        {% endif %}
+      </div>
+      <div class="column">
+        {% if block.settings.description != blank %}
+          <div class="text-container">
+            {{ block.settings.description }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    <button class="open-modal-button" data-open-modal-id="{{ block.id }}">{{ block.settings.button_text }}</button>
+    <div
+      data-modal-id="{{ block.id }}"
+      class="modal-box"
+      {{ block.shopify_attributes }}>
+      <button data-close-modal-id="{{ block.id }}" class="modal-box-close">&times;</button>
+      <div class="column">
+        {% if block.settings.image != blank %}
+          <img
+            src="{{ block.settings.image | image_url }}"
+            alt="{{ block.settings.image.alt }}"
+            class="image"
+            width="100%"
+            height="100%"
+            loading="lazy">
+        {% else %}
+          {{ 'detailed-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+        {% endif %}
+      </div>
+
+      <div class="product-cards">
+        {% for product in block.settings.product_list %}
+          <div class="product-card">
+            <a href="{{ product.url }}">
+              {% if block.settings.image != blank %}
+                <img
+                  src="{{ product.featured_image | image_url }}"
+                  alt="{{ product.featured_image.alt }}"
+                  class="product-card-image"
+                  width="100%"
+                  height="100%"
+                  loading="lazy">
+              {% else %}
+                {{ 'detailed-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              {% endif %}
+            </a>
+
+            <div class="product-card-data">
+              <div class="product-card-data-main">
+                <a href="{{ product.url }}">
+                  <h3 class="product-card-data-title">{{ product.title }}</h3>
+                </a>
+
+                <div class="product-card-price">
+                  {% if product.compare_at_price > product.price %}
+                    <p class="text-red">{{ product.price | money_without_currency | replace: ".00", "" }} {{ cart.currency.iso_code }}</p>
+                    <del>{{ product.compare_at_price | money_without_currency | replace: ".00", "" }} {{ cart.currency.iso_code }}</del>
+                  {% else %}
+                    <p>{{ product.price | money_without_currency | replace: ".00", "" }} {{ cart.currency.iso_code }}</p>
+                  {% endif %}
+                </div>
+              </div>
+              {% if product.description != blank %}
+                <div class="product-card-data-secondary">
+                  <p>{{ product.description | strip_html | truncatewords: 20 }}</p>
+                </div>
+              {% endif %}
+              <div class="product-card-submit-box">
+                {% if product.variants.size != 1 %}
+                  <div class="product-card-size">
+                    <select
+                      class="size-select"
+                      id="size"
+                      name="size">
+                      {% for variant in product.variants %}
+                        <option value="{{ variant.id }}">{{ variant.title }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                {% else %}
+                  <p class="product-card-size">One Size</p>
+                {% endif %}
+
+
+                <button
+                  data-submit-modal-id="{{ block.id }}"
+                  type="submit"
+                  class="product-card-add-to-cart"
+                  data-action="add-to-cart"
+                  data-variant-id="{{ product.variants.first.id }}"
+                  data-quantity="1">
+                  {{ section.settings.button_submit }}
+                </button>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+    </div>
+  {% endfor %}
+</section>
+
+{% schema %}
+  {
+    "name": "lookBook",
+    "class": "section",
+    "settings": [
+      {
+        "type": "text",
+        "id": "headert",
+        "label": "Header Text",
+        "default": "lookBook"
+      }, {
+        "type": "text",
+        "id": "button_submit",
+        "label": "Button Submit",
+        "default": "Add to cart"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "product",
+        "name": "product",
+        "settings": [
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "Image"
+          }, {
+            "type": "product_list",
+            "id": "product_list",
+            "label": "Product list"
+          }, {
+            "type": "text",
+            "id": "button_text",
+            "label": "Button text",
+            "default": "Shop the look"
+          }, {
+            "type": "richtext",
+            "id": "description",
+            "label": "Description",
+            "default": "<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nam, aperiam, corrupti saepe molestiae temporibus nulla id alias dicta ipsa nemo reiciendis quod praesentium, odit architecto? Dolore, ipsa consequatur? Quis, a.</p>"
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "lookBook",
+        "category": "lookBook"
+      }
+    ]
+  }
+{% endschema %}
+
+{% stylesheet %}
+{% endstylesheet %}
+
+{% javascript %}
+  document.addEventListener('DOMContentLoaded', function() {
+    const openModalButtons = document.querySelectorAll('.open-modal-button');
+    const closeButtons = document.querySelectorAll('.modal-box-close');
+
+    openModalButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        const modalId = button.getAttribute('data-open-modal-id');
+        const modalBox = document.querySelector(`[data-modal-id="${modalId}"]`);
+        modalBox.style.display = 'grid';
+      });
+    });
+
+    closeButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        const modalId = button.getAttribute('data-close-modal-id');
+        const modalBox = document.querySelector(`[data-modal-id="${modalId}"]`);
+        modalBox.style.display = 'none';
+      });
+    });
+
+    const selectElements = document.querySelectorAll('.size-select');
+
+    selectElements.forEach(function(select) {
+      select.addEventListener('change', function() {
+        const variantId = select.value;
+        const addToCartButton = select.closest('.product-card').querySelector('.product-card-add-to-cart');
+        addToCartButton.setAttribute('data-variant-id', variantId);
+      });
+    });
+
+    const addToCartButtons = document.querySelectorAll('.product-card-add-to-cart');
+
+    addToCartButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        const variantId = button.getAttribute('data-variant-id');
+        const quantity = button.getAttribute('data-quantity');
+
+        fetch('/cart/add.js', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(
+            {id: variantId, quantity: quantity}
+          )
+        }).then(response => response.json()).then(data => {
+          console.log(data);
+        }).catch(error => {
+          console.error('Error:', error);
+        });
+      });
+    });
+  });
+{% endjavascript %}
