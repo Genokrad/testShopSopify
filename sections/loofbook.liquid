@@ -12,6 +12,17 @@
     width: 100%;
   }
 
+  .product-card-add-to-cart:hover,
+  .product-card-add-to-cart:focus {
+    background-color: white;
+    color: black;
+  }
+
+  .product-card-add-to-cart:active {
+    background-color: black;
+    color: white;
+  }
+
   .size-select {
     background-color: transparent;
     border: none;
@@ -174,7 +185,9 @@
         {% endif %}
       </div>
     </div>
-    <button class="open-modal-button" data-open-modal-id="{{ block.id }}">{{ block.settings.button_text }}</button>
+    {% if block.settings.product_list != blank %}
+      <button class="open-modal-button" data-open-modal-id="{{ block.id }}">{{ block.settings.button_text }}</button>
+    {% endif %}
     <div
       data-modal-id="{{ block.id }}"
       class="modal-box"
